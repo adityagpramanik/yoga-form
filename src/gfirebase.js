@@ -1,5 +1,5 @@
-import firebase from "firebase";
 import dotenv from "dotenv"
+import firebase from 'firebase/compat/app'
 
 dotenv.config();
 
@@ -12,6 +12,6 @@ var firebaseApp = firebase.initializeApp({
   appId: process.env.APP_ID,
 });
 
-var db = firebase.firestore();
+var db = firebase.firestore;
 
 export {db};

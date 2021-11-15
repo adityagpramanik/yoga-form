@@ -1,5 +1,6 @@
 import React from "react";
 import "./Form.css";
+import {db} from "../gfirebase";
 
 export default function Form() {
     function submit (e) {
@@ -21,7 +22,7 @@ export default function Form() {
                     type="text"
                     className="form-control"
                     placeholder="Firstname"
-                    // required
+                    required
                   />
                 </div>
 
@@ -30,7 +31,7 @@ export default function Form() {
                     type="text"
                     className="form-control"
                     placeholder="Lastname"
-                    // required
+                    required
                   />
                 </div>
               </div>
@@ -45,7 +46,7 @@ export default function Form() {
                 type="email"
                 className="form-control"
                 placeholder="Email"
-                // required
+                required
               />
             </div>
           </div>
@@ -58,7 +59,7 @@ export default function Form() {
                 type="tel"
                 className="form-control"
                 placeholder="Contact"
-                // required
+                required
               />
             </div>
           </div>
@@ -71,7 +72,7 @@ export default function Form() {
                 type="number"
                 className="form-control"
                 placeholder="Age"
-                // required
+                required
               />
             </div>
           </div>
@@ -87,7 +88,7 @@ export default function Form() {
                   name="exampleRadios"
                   id="exampleRadios1"
                   value="option1"
-                //   required
+                  required
                 />
                 <label class="form-check-label" for="exampleRadios1">
                   6-7 AM
