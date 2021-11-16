@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import "./Form.css";
-import { db } from "../gfirebase";
+// import { auth } from "../gfirebase";
+import { firebase } from "../gfirebase";
+import { useNavigate, useResolvedPath } from "react-router";
+import { BiHide } from "react-icons/bi";
+import { BiShow } from "react-icons/bi";
 
 export default function Form() {
   const [fname, setFname] = useState("");
@@ -9,20 +13,57 @@ export default function Form() {
   const [contact, setContact] = useState("");
   const [age, setAge] = useState(18);
   const [slot, setSlot] = useState("");
+  const [passkey, setPasskey] = useState("");
+  const [obsText, setObsText] = useState(true);
+  const [loginCheck, setLoginCheck] = useState(false);
+
+
+  let navigate = useNavigate();
+  // let userAuth = auth();
+
+  if (firebase.auth().currentUser != null) setLoginCheck(true);
 
   const submit = (e) => {
     e.preventDefault();
 
-    if (age >= 18 && age <= 65)
+    if (passkey.length < 10) alert("Choose a strong password");
+
+    if (age >= 18 && age <= 65) {
       alert(
-        fname + " " + lname + " " + email + " " + contact + " " + age + " " + slot
+        fname +
+          " " +
+          lname +
+          " " +
+          email +
+          " " +
+          contact +
+          " " +
+          age +
+          " " +
+          slot
       );
-    else {
-      alert('Unable to register user must be at least 18 & at most 65 years old');
+      navigate({ to: "/account" }, { options: { replace: true } });
+    } else {
+      alert(
+        "Unable to register user must be at least 18 & at most 65 years old"
+      );
     }
+
+    firebase.auth()
+      .createUserWithEmailAndPassword(email, passkey)
+      .then((userCredential) => {
+        // Signed in
+        var user = userCredential.user;
+        // ...
+      })
+      .catch((error) => {
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        // ..
+      });
   };
   return (
-    <div className="ms-5 me-5">
+    <div className="m-2">
       <form
         className="col-md-5 form user-select-none mx-auto mb-5 needs-validation"
         onSubmit={submit}
@@ -30,7 +71,7 @@ export default function Form() {
       >
         <h2 className="text-center">Admission form</h2>
 
-        <div class="d-grid gap-3">
+        <div className="d-grid gap-3">
           <div className="container m-auto p-0">
             <label className="form-label">Name</label>
 
@@ -76,9 +117,16 @@ export default function Form() {
             </div>
           </div>
 
-          <div className="container m-auto p-0">
-            <label className="form-label">Mobile Number</label>
+          <div className="row">
+            <div className="col">
+              <label className="form-label">Mobile Number</label>
+            </div>
+            <div className="col">
+              <label className="form-label">Age</label>
+            </div>
+          </div>
 
+          <div className="row">
             <div className="col">
               <input
                 type="tel"
@@ -89,11 +137,6 @@ export default function Form() {
                 onChange={(e) => setContact(e.target.value)}
               />
             </div>
-          </div>
-
-          <div className="container m-auto p-0">
-            <label className="form-label">Age</label>
-
             <div className="col">
               <input
                 type="number"
@@ -101,7 +144,9 @@ export default function Form() {
                 placeholder="Age"
                 required
                 value={age}
-                onChange={(e) => {setAge(e.target.value); }}
+                onChange={(e) => {
+                  setAge(e.target.value);
+                }}
               />
             </div>
           </div>
@@ -110,9 +155,9 @@ export default function Form() {
             <label>Timing</label>
 
             <div className="row m-2">
-              <div class="form-check col-3">
+              <div className="form-check col-3">
                 <input
-                  class="form-check-input"
+                  className="form-check-input"
                   type="radio"
                   name="exampleRadios"
                   id="exampleRadios1"
@@ -120,14 +165,14 @@ export default function Form() {
                   value={slot}
                   onChange={(e) => setSlot("A")}
                 />
-                <label class="form-check-label" for="exampleRadios1">
+                <label className="form-check-label" for="exampleRadios1">
                   6-7 AM
                 </label>
               </div>
 
-              <div class="form-check col-3">
+              <div className="form-check col-3">
                 <input
-                  class="form-check-input"
+                  className="form-check-input"
                   type="radio"
                   name="exampleRadios"
                   id="exampleRadios2"
@@ -135,14 +180,14 @@ export default function Form() {
                   value={slot}
                   onChange={(e) => setSlot("B")}
                 />
-                <label class="form-check-label" for="exampleRadios2">
+                <label className="form-check-label" for="exampleRadios2">
                   7-8 AM
                 </label>
               </div>
 
-              <div class="form-check col-3">
+              <div className="form-check col-3">
                 <input
-                  class="form-check-input"
+                  className="form-check-input"
                   type="radio"
                   name="exampleRadios"
                   id="exampleRadios3"
@@ -150,14 +195,14 @@ export default function Form() {
                   value={slot}
                   onChange={(e) => setSlot("C")}
                 />
-                <label class="form-check-label" for="exampleRadios3">
+                <label className="form-check-label" for="exampleRadios3">
                   8-9 AM
                 </label>
               </div>
 
-              <div class="form-check col-3">
+              <div className="form-check col-3">
                 <input
-                  class="form-check-input"
+                  className="form-check-input"
                   type="radio"
                   name="exampleRadios"
                   id="exampleRadios3"
@@ -165,12 +210,40 @@ export default function Form() {
                   value={slot}
                   onChange={(e) => setSlot("D")}
                 />
-                <label class="form-check-label" for="exampleRadios3">
+                <label className="form-check-label" for="exampleRadios3">
                   5-6 PM
                 </label>
               </div>
             </div>
           </div>
+
+          {loginCheck ? (
+            <></>
+          ) : (
+            <div className="container m-auto p-0">
+              <label className="form-label">Password</label>
+
+              <div className="form-group">
+                <div class="input-group mb-3">
+                  <input
+                    type={obsText ? "password" : "text"}
+                    className="form-control"
+                    required
+                    value={passkey}
+                    onChange={(e) => setPasskey(e.target.value)}
+                  />
+                  <div class="input-group-addon mt-auto mb-auto m-1">
+                    <div
+                      class="input-group-text"
+                      onClick={() => setObsText(!obsText)}
+                    >
+                      {obsText ? <BiHide /> : <BiShow />}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           <button
             type="submit"

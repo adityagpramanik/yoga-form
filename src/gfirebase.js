@@ -12,6 +12,11 @@ var firebaseApp = firebase.initializeApp({
   appId: process.env.APP_ID,
 });
 
+alert(process.env.API_KEY);
 var db = firebase.firestore;
+var auth = firebaseApp.auth;
 
-export {db};
+// export {db};
+// export {auth};
+
+export {firebase};

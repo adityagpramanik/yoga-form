@@ -2,22 +2,17 @@ import Header from "./Components/Header.js";
 import Form from "./Components/Form.js";
 import UserPage from "./Components/UserPage.js";
 import React, { useState, useEffect } from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Outlet,
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Footer } from "./Components/Footer";
+import LoginPage from "./Components/LoginPage.js";
 
-function App(props) {
-  let login = false,
-    home = true;
-
+function App() {
+  let loginCheck = true;
   const CompletePay = () => {
     alert("Hey");
     console.log("Initiating payment");
   };
+
   return (
     <Router>
       <Routes>
@@ -26,7 +21,7 @@ function App(props) {
           path="/"
           element={
             <div>
-              <Header isLogin={login} isHome={home} />
+              <Header />
               <Form />
             </div>
           }
@@ -36,11 +31,12 @@ function App(props) {
           path="/account"
           element={
             <div>
-              <Header isLogin={login} isHome={home} />
-              <UserPage />
+              <Header />
+              <UserPage isLogin={loginCheck} />
             </div>
           }
-        />
+        >
+        </Route>
       </Routes>
       <Footer />
     </Router>
