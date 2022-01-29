@@ -1,12 +1,12 @@
 import React from "react";
-import PropTypes from "prop-types";
 import yoga from "../Assets/Yoga.png";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { FiUser } from "react-icons/fi";
-import { FiLogIn } from "react-icons/fi";
 import { FiLogOut } from "react-icons/fi";
 import { FiHome } from "react-icons/fi";
+import { auth } from "../gfirebase";
+import { signOut } from "@firebase/auth";
 
 export default function Header() {
   let image = {
@@ -15,13 +15,13 @@ export default function Header() {
     marginBottom: "10px",
   };
 
-  // let navigate = useNavigate();
+  let navigate = useNavigate();
 
-  // const navHome = (e)=> {
-  //   e.preventDefault();
-  //   console.log("nav home");
-  //   navigate("/", {replace: true});
-  // };
+  const userLogout = async () => {
+    alert("loggin out");
+    await signOut(auth);
+    navigate("/", {replace: true});
+  };
 
   return (
     <>
@@ -52,10 +52,10 @@ export default function Header() {
             </button>
           </div>
           <div className="col me-3" style={{ float: "right" }}>
-            <button className="btn shadow-sm">
+            {/* <button className="btn shadow-sm" onClick={userLogin}>
               <FiLogIn />
-            </button>
-            <button className="btn shadow-sm">
+            </button> */}
+            <button className="btn shadow-sm" onClick={userLogout}>
               <FiLogOut />
             </button>
           </div>

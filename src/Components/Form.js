@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./Form.css";
-// import { auth } from "../gfirebase";
-import { firebase } from "../gfirebase";
-import { useNavigate, useResolvedPath } from "react-router";
+import { auth, store } from "../gfirebase";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { BiHide } from "react-icons/bi";
 import { BiShow } from "react-icons/bi";
+import { addDoc, collection, getDocs, query, where, doc } from "@firebase/firestore";
+import { useNavigate } from "react-router-dom";
 
 export default function Form() {
   const [fname, setFname] = useState("");
@@ -16,58 +17,96 @@ export default function Form() {
   const [passkey, setPasskey] = useState("");
   const [obsText, setObsText] = useState(true);
   const [loginCheck, setLoginCheck] = useState(false);
+  const [monthCheck, setMonthCheck] = useState(false);
 
+  useEffect(() => {
+    const getUser = async () => {
+      if (auth.currentUser != null) {
+        setLoginCheck(true);
 
-  let navigate = useNavigate();
-  // let userAuth = auth();
+        const q = query(
+          collection(store, "details"),
+          where("email", "==", auth.currentUser.email)
+        );
 
-  if (firebase.auth().currentUser != null) setLoginCheck(true);
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+          const date = new Date();
+          if (doc.data()["booked"].at(-1) === date.getMonth()) {
+            console.log(doc.id, " => ", doc.data()["booked"].at(-1));
+            setMonthCheck(true);
+          }
+        });
+      }
+    };
+    getUser();
+    console.log("user: " + auth.currentUser);
+  });
 
-  const submit = (e) => {
+  const navigate = useNavigate();
+
+  const CompletePay = () => {
+    console.log("Initiating payment");
+    return true;
+  };
+
+  const submit = async (e) => {
     e.preventDefault();
 
     if (passkey.length < 10) alert("Choose a strong password");
-
-    if (age >= 18 && age <= 65) {
-      alert(
-        fname +
-          " " +
-          lname +
-          " " +
-          email +
-          " " +
-          contact +
-          " " +
-          age +
-          " " +
-          slot
-      );
-      navigate({ to: "/account" }, { options: { replace: true } });
-    } else {
+    else if (age < 18 && age > 65) {
       alert(
         "Unable to register user must be at least 18 & at most 65 years old"
       );
     }
+    else if (CompletePay) {
+      if (auth.currentUser == null) {
+        createUserWithEmailAndPassword(auth, email, passkey)
+          .then((userCredential) => {
+            var user = userCredential.user;
+            console.log("user created: " + user);
+            // ...
+          })
+          .catch((error) => {
+            var errorCode = error.code;
+            var errorMessage = error.message;
+            console.log("unable to create user: " + errorMessage);
+          });
+      }
 
-    firebase.auth()
-      .createUserWithEmailAndPassword(email, passkey)
-      .then((userCredential) => {
-        // Signed in
-        var user = userCredential.user;
-        // ...
-      })
-      .catch((error) => {
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        // ..
+      let bookedArray = [];
+      const detailsCollRef = collection(store, "details");
+
+      const querySnapshot = await getDocs(query(detailsCollRef, where("email", "==", email)));
+      querySnapshot.forEach((doc) => {
+        bookedArray = doc.data()["booked"];
       });
+
+      const today = new Date();
+      bookedArray.push(today.getMonth());
+
+      await addDoc(collection(store, "details"), {
+        name: { fname: fname, lname: lname },
+        email: email,
+        contact: contact,
+        age: age,
+        slot: slot,
+        booked: bookedArray,
+      });
+
+      console.log("database updated successfully.");
+
+      navigate("/account", { replace: true });
+    }
+    else
+      alert("Payment failed. Try again!");
   };
   return (
     <div className="m-2">
       <form
         className="col-md-5 form user-select-none mx-auto mb-5 needs-validation"
         onSubmit={submit}
-        novalidate
+        noValidate
       >
         <h2 className="text-center">Admission form</h2>
 
@@ -210,7 +249,7 @@ export default function Form() {
                   value={slot}
                   onChange={(e) => setSlot("D")}
                 />
-                <label className="form-check-label" for="exampleRadios3">
+                <label className="form-check-label" for="exampleRadios4">
                   5-6 PM
                 </label>
               </div>
@@ -245,14 +284,24 @@ export default function Form() {
             </div>
           )}
 
-          <button
-            type="submit"
-            className="rounded-3 btn btn-primary border mt-3 me-5 ms-5"
-          >
-            <p className="m-0 p-0" style={{ color: "#ffffff" }}>
-              Enroll
-            </p>
-          </button>
+          {!monthCheck ? (
+            <button
+              type="submit"
+              className="rounded-3 btn btn-primary border mt-3 me-5 ms-5"
+            >
+              <p className="m-0 p-0" style={{ color: "#ffffff" }}>
+                Enroll
+              </p>
+            </button>
+          ) : (
+            <button
+              className="rounded-3 btn btn-primary disabled border mt-3 me-5 ms-5"
+            >
+              <p className="m-0 p-0" style={{ color: "#ffffff" }}>
+                Enroll
+              </p>
+            </button>
+          )}
         </div>
       </form>
     </div>
